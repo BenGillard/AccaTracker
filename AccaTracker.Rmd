@@ -1,0 +1,131 @@
+---
+title: "Acca Tracker"
+date: "Updated: `r Sys.Date()`"
+output: 
+  html_document: 
+    toc: yes
+    toc_depth: 4
+    theme: cerulean
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, tidy = TRUE, message = FALSE, error = FALSE)
+```
+
+```{r importdata}
+library(tidyverse)
+
+AccaData<- read.csv("Results.csv") #import data
+AccaData$Date<- as.Date(AccaData$Date, format = "%d/%m/%Y") #format date properly
+AccaData$Odds<- as.numeric(format(AccaData$Odds, digits = 3))
+#AccaData$Win<- as.factor(AccaData$Win) #wanted to make this a factor but the summary uses sum() which only works on numeric data
+AccaData$HomeAway<- as.factor(AccaData$HomeAway)
+```
+
+
+Keeping track of our team acca and looking at trends. Data covers the period between `r min(AccaData$Date)` and `r max(AccaData$Date)` and the gladiators playing are: `r unique(AccaData$Player)`. **That one time our acca actually came in was before data was collected.**
+
+# Stats as a group
+
+As a group, our overall win rate between `r min(AccaData$Date)` and `r max(AccaData$Date)` is **`r format(sum(AccaData$Win)/length(AccaData$Win)*100, digits = 2)`%**. As a group, we have backed `r length(unique(AccaData$Team))` different teams. Our most popular team to bet on is **`r names(which.max(table(AccaData$Team)))`**. Our most popular team to bet against is **`r names(which.max(table(AccaData$Against)))`**. The average odds for a bet are **`r format(mean(AccaData$Odds), digits = 3)`** ([converter to fractions if wanted](https://www.aceodds.com/bet-calculator/odds-converter.html)). Our biggest odds winning bet ever was by **`r AccaData[AccaData$Win == 1,] %>% filter(Odds == max(Odds)) %>% select(Player)`** when they bet on `r AccaData[AccaData$Win == 1,] %>% filter(Odds == max(Odds)) %>% select(Team)` to beat `r AccaData[AccaData$Win == 1,] %>% filter(Odds == max(Odds)) %>% select(Against)` at odds of `r AccaData[AccaData$Win == 1,] %>% filter(Odds == max(Odds)) %>% select(Odds)`. The softest of bets (unsurprisingly) came from **`r AccaData[AccaData$Odds == min(AccaData$Odds),"Player"]`** when they bet on `r AccaData[AccaData$Odds == min(AccaData$Odds),"Team"]` to beat `r AccaData[AccaData$Odds == min(AccaData$Odds),"Against"]` at odds of `r AccaData[AccaData$Odds == min(AccaData$Odds),"Odds"]` - the bet `r ifelse(AccaData[AccaData$Odds == min(AccaData$Odds),"Win"] == 1, "won", "lost")`: was it *really* worth it?
+
+## Success (or lack thereof) tracker
+
+```{r timetracker}
+#AccaData %>% group_by(Date) %>% summarise(Wins = sum(Win), Odds = prod(Odds)) %>% ggplot(aes(x = Date)) + geom_bar(aes(y = Wins, fill = Date), stat = "identity") + geom_smooth(aes(y = Odds/70), stat = "identity") + theme_classic() + theme(legend.position = "none") + labs(title = "Weekly tracker", subtitle = "Bars for Wins (left axis), line for Total Odds (right axis)") + scale_y_continuous(breaks = 1:11, sec.axis = sec_axis(name = "Odds", transform = ~.*70)) #get summary of each acca. this plot adds a second axis and plots a line for odds. I prefer the second plot for simplicity of figure and code
+
+AccaData %>% group_by(Date) %>% summarise(Wins = sum(Win), Return = 11*prod(Odds)) %>% ggplot(aes(x = Date)) + geom_bar(aes(y = Wins, fill = Return), stat = "identity") + geom_text(aes(label=ceiling(Return), y = Wins),vjust=-0.5) + theme_classic() + labs(title = "Weekly tracker", subtitle = "Total estimated Return (£) from £11 stake shown above bar", caption = "bet365 boost odds on accas so the payout shown may be less than actual return on Doug's betslip") + ylim(c(0,11)) + scale_y_continuous(breaks = 0:11) + theme(panel.grid.major.y = element_line(linetype = 2)) #get summary of each acca
+```
+
+## Home/Away and Odds tracker
+
+Tracker of the ratio of home/away picks and a histogram showing at what odds our winning (and losing) bets are placed.
+
+```{r homeaway, fig.show='hold', out.width='50%'}
+ggplot(data = AccaData, aes(x = Date, y = Win, fill = HomeAway)) + geom_bar(stat = "identity") + theme_classic() + labs(title = "Home/Away tracker") + scale_y_continuous(breaks = 1:11) #bar plot showing split of home or away picks for winning bets
+
+#summary(lm(Win ~ Odds + HomeAway, data = AccaData)) #regression using odds and homeaway as predictors of win
+
+ggplot(data = AccaData) + geom_histogram(aes(x = Odds, group = Win, fill = as.factor(Win)), binwidth = 0.1) + theme_classic() + labs(title = "Histogram of bets made at different odds", fill = "Win") + theme(legend.position = "inside", legend.position.inside = c(0.9,0.9)) + scale_fill_brewer(palette = "Dark2", direction = -1) #histogram showing success of bets at different odds. I think this plot could be a nice way of showing the sweet spot of odds
+
+```
+
+# Individual Stats
+
+## Summary of each player (after `r length(unique(AccaData$Date))` picks)
+
+```{r GroupTable}
+#best way to present a lot of the data will be as a table
+library(kableExtra)
+PlayerSummary<- AccaData %>% group_by(Player) %>% summarise(PercentWin = format(sum(Win)/length(Win)*100, digits = 2),
+                                            Mean = format(mean(Odds), digits = 3),
+                                            Median = format(median(Odds), digits = 3),
+                                            Min = format(min(Odds), digits = 3),
+                                            Max = format(max(Odds), digits = 3),
+                                            PercentHome = format(sum(HomeAway == "H")/length(HomeAway)*100, digits = 2),
+                                            DifferentTeams = length(unique(Team)),
+                                            FavouriteTeam = paste0(names(which.max(table(Team))), " (",table(Team)[which.max(table(Team))], ")"),
+                                            HatedTeam = paste0(names(which.max(table(Against))), " (",table(Against)[which.max(table(Against))], ")"))
+
+#PlayerSummary<- cbind(PlayerSummary, Consistency = as.numeric(PlayerSummary$Min)/as.numeric(PlayerSummary$Max)
+
+PlayerSummary<- PlayerSummary[order(as.numeric(PlayerSummary$PercentWin), decreasing = TRUE),] #order by win%
+
+PlayerSummary %>% kbl(caption = "For Favourite and Hated teams, number of times picked is shown in brackets. If there is tie, the team first alphabetically is shown.") %>% kable_classic(html_font = "Cambria") %>% kable_styling("striped") %>% column_spec(3, background = spec_color(as.numeric(PlayerSummary$Mean), option = "plasma")) %>% column_spec(4, background = spec_color(as.numeric(PlayerSummary$Median), option = "C")) %>% column_spec(5, background = spec_color(as.numeric(PlayerSummary$Min), option = "C")) %>% column_spec(6, background = spec_color(as.numeric(PlayerSummary$Max), option = "C")) %>% column_spec(3:6, bold = FALSE, color = "lightgreen")
+```
+
+![Colour scale](C:\Users\bg14337\OneDrive - University of Bristol\Documents\Extra Stuff\SillyhtmlDocs\Acca\Palette_viridis.png)
+The most timid player (ie shrunken balls) is `r PlayerSummary$Player[which.min(PlayerSummary$Median)]` whereas the bravest player is `r PlayerSummary$Player[which.max(PlayerSummary$Median)]`.
+
+# Individual bet tracker
+
+```{r playeroddsovertime}
+#make a line plot of everyone's bet odds week by week
+
+d<- plotly::highlight_key(AccaData, ~Player)
+
+plotly::highlight(plotly::ggplotly(ggplot(data = d, aes(x = Date, y = Odds, col = Player)) + geom_point(aes(shape = as.factor(Win))) + geom_line() + theme_classic() + geom_hline(yintercept = 2, lty = 2, alpha = 0.5) + labs(title = "Tracker of bet odds over time", subtitle = "Click on a data point to see that player's trend (hold shift key for multiple selections", caption = "Dotted line represents \"evens\"") + theme(legend.position = "none")), on = "plotly_click", off = "plotly_relayout", color = "black", opacityDim = 0.3)
+```
+
+# *What you could have won...*
+
+What if you just placed a £1 stake on your selection every week instead? How many £££s would you be up (or down)?
+
+```{r bettally}
+Tally<- AccaData[AccaData$Win == 1,] %>% group_by(Player) %>% summarise(Total = sum(Odds)) %>% mutate(Winnings = Total - length(unique(AccaData$Date)))# %>% select(-2)
+
+Tally<- Tally[order(as.numeric(Tally$Winnings), decreasing = TRUE),] #order by win%
+
+#Tally$Winnings <- paste0("\u00A3", Tally$Winnings) #trying to add £ for nice readability but caused issues
+
+Tally[-2] %>% kbl(caption = "What if you went it alone?", align = "lc", table.attr = "style='width:30%;'") %>% kable_classic(html_font = "Cambria") %>% kable_styling("striped") %>% column_spec(2, color = "white", background = ifelse(Tally$Winnings < 0, "red", "green"))
+```
+
+
+```{r predictiveness, eval=FALSE, warning=FALSE, message=FALSE}
+#Multiple ROC curves. One for players, one for home/away, one for stratified odds?
+#having difficulty with this. I'm not sure the curves are exactly what I am expecting to show
+#this could be an alternative: https://cran.r-project.org/web/packages/COINr/vignettes/sensitivity.html
+
+cor(x = AccaData$Odds, y = AccaData$Win) #correlation between odds and outcome. negative value means that the lower the odds, the more likely a win (which is what would be expected).
+
+library(pROC)
+
+AccaModel<- lapply(unique(AccaData$Player), function(x) glm(Win ~ Odds, data = AccaData[which(AccaData$Player == x),])) #regression using odds and homeaway as predictors of win
+names(AccaModel)<- unique(AccaData$Player)
+
+for(player in names(AccaModel)){
+  #print(player)
+print(ggroc(roc(AccaModel[[player]][["y"]], predict(AccaModel[[player]], type = "response"))) + geom_abline(intercept = 1, linetype = 2) + theme_classic() + labs(title = paste(player))) + labs(x = "False Positive Rate", y = "True Positive Rate") #ROC curve for model
+}
+
+#maybe these ROC curves will work better when more data has been collected?
+```
+
+
+created by Ben Gillard
