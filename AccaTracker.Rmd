@@ -90,7 +90,7 @@ The most timid player (ie shrunken balls) is `r PlayerSummary$Player[which.min(P
 
 # Individual bet tracker
 
-```{r playeroddsovertime}
+```{r playeroddsovertime, out.width='100%'}
 #make a line plot of everyone's bet odds week by week
 
 d<- plotly::highlight_key(AccaData, ~Player)
