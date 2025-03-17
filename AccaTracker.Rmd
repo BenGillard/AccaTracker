@@ -86,7 +86,7 @@ PlayerSummary %>% kbl(caption = "For Favourite and Hated teams, number of times 
 ```
 
 ![Colour scale](C:\Users\bg14337\OneDrive - University of Bristol\Documents\Extra Stuff\SillyhtmlDocs\Acca\Palette_viridis.png)
-The most timid player (ie shrunken balls) is `r PlayerSummary$Player[which.min(PlayerSummary$Median)]` whereas the bravest player is `r PlayerSummary$Player[which.max(PlayerSummary$Median)]`.
+The most timid player (ie shrunken balls) is `r PlayerSummary$Player[which.min(PlayerSummary$Median)]` whereas the bravest player is `r PlayerSummary$Player[which.max(PlayerSummary$Median)]` (based on median odds).
 
 # Individual bet tracker
 
