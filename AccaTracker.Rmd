@@ -34,7 +34,7 @@ AccaData$HomeAway<- as.factor(AccaData$HomeAway)
 ```
 
 
-Keeping track of our team acca and looking at trends. Data covers the period between `r min(AccaData$Date)` and `r max(AccaData$Date)` and the gladiators playing are: `r unique(AccaData$Player)`. **That one time our acca actually came in was before data was collected.**
+Keeping track of our team acca and looking at trends. Data covers the period between `r min(AccaData$Date)` and `r max(AccaData$Date)` and the gladiators playing are: `r unique(AccaData$Player)`. **That one time our acca actually came in (for £3.5K) was before data was collected. On 29/3/2025, Doug cashed out for £1509. It was the correct decision as Leeds went on to draw and the bet would have lost.**
 
 # Stats as a group
 
