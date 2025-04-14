@@ -34,7 +34,7 @@ AccaData$HomeAway<- as.factor(AccaData$HomeAway)
 ```
 
 
-Keeping track of our team acca and looking at trends. Data covers the period between `r min(AccaData$Date)` and `r max(AccaData$Date)` and the gladiators playing are: `r unique(AccaData$Player)`. **That one time our acca actually came in (for £3.5K) was before data was collected. On 29/3/2025, Doug cashed out for £1509. It was the correct decision as Leeds went on to draw and the bet would have lost.**
+Keeping track of our team acca and looking at trends. Data covers the period between `r min(AccaData$Date)` and `r max(AccaData$Date)` and the gladiators playing are: `r unique(AccaData$Player)`. **That one time our acca actually came in (for £3.5K on 16/09/2023) was before data was being collected. On 29/3/2025, Doug cashed out for £1509. It was the correct decision as Leeds went on to draw and the bet would have lost.**
 
 # Stats as a group
 
@@ -50,7 +50,7 @@ AccaData %>% group_by(Date) %>% summarise(Wins = sum(Win), Return = 11*prod(Odds
 
 ## Home/Away and Odds tracker
 
-Tracker of the ratio of home/away picks and a histogram showing at what odds our winning (and losing) bets are placed.
+Tracker of the ratio of home/away picks and a histogram showing at what odds our winning (and losing) bets are placed. On 13/04/2025, Doug picked Birmingham to win at Wembley which is why there is one "Neutral" bit on the Home/Away plot (they lost by the way).
 
 ```{r homeaway, fig.show='hold', out.width='50%'}
 ggplot(data = AccaData, aes(x = Date, y = Win, fill = HomeAway)) + geom_bar(stat = "identity") + theme_classic() + labs(title = "Home/Away tracker") + scale_y_continuous(breaks = 1:11) #bar plot showing split of home or away picks for winning bets
@@ -58,7 +58,6 @@ ggplot(data = AccaData, aes(x = Date, y = Win, fill = HomeAway)) + geom_bar(stat
 #summary(lm(Win ~ Odds + HomeAway, data = AccaData)) #regression using odds and homeaway as predictors of win
 
 ggplot(data = AccaData) + geom_histogram(aes(x = Odds, group = Win, fill = as.factor(Win)), binwidth = 0.1) + theme_classic() + labs(title = "Histogram of bets made at different odds", fill = "Win") + theme(legend.position = "inside", legend.position.inside = c(0.9,0.9)) + scale_fill_brewer(palette = "Dark2", direction = -1) #histogram showing success of bets at different odds. I think this plot could be a nice way of showing the sweet spot of odds
-
 ```
 
 # Individual Stats
