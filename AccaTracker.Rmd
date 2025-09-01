@@ -58,7 +58,7 @@ AccaData[which(AccaData$Date %in% CloseCalls$Date & AccaData$Win == 0),1:6] %>% 
 Tracker of the ratio of home/away picks and a histogram showing at what odds our winning (and losing) bets are placed. On 13/04/2025, Doug picked Birmingham to win at Wembley which is why there is one "Neutral" bit on the Home/Away plot (they lost by the way).
 
 ```{r homeaway, fig.show='hold', out.width='50%', warning=FALSE}
-ggplot(data = AccaData, aes(x = as.character(Date), y = Win, fill = HomeAway)) + geom_bar(stat = "identity") + theme_classic() + labs(title = "Home/Away tracker") + scale_y_continuous(breaks = 1:11) #bar plot showing split of home or away picks for winning bets
+ggplot(data = AccaData, aes(x = as.character(Date), y = Win, fill = HomeAway)) + geom_bar(stat = "identity") + theme_classic() + labs(title = "Home/Away tracker") + scale_y_continuous(breaks = 1:11) + theme(axis.text.x = element_blank(), axis.title.x = element_blank()) #bar plot showing split of home or away picks for winning bets
 
 #summary(lm(Win ~ Odds + HomeAway, data = AccaData)) #regression using odds and homeaway as predictors of win
 
@@ -66,11 +66,22 @@ ggplot(data = AccaData) + geom_histogram(aes(x = Odds, group = Win, fill = as.fa
 
 #popularity of teams
 library(treemapify)
-AccaData %>% group_by(Team) %>% summarise(Picked = n()) %>% ggplot(aes(area = Picked, fill = Team, label = paste(Team, Picked, sep = "\n"))) + geom_treemap() +   geom_treemap_text(place = "centre") + theme(legend.position = "none") + labs(title = "Popular teams to bet on")
+AccaData %>% group_by(Team) %>% summarise(Wins = sum(Win), Picked = n()) %>% mutate(Percent = Wins/Picked*100) %>% ggplot(aes(area = Picked, fill = Percent, label = paste(Team, Picked, sep = "\n"))) + geom_treemap() +   geom_treemap_text(place = "centre", aes(colour = after_scale(prismatic::best_contrast(fill, c("white", "black"))))) + theme(legend.position = "none") + labs(title = "Popular teams to bet on (the lighter the blue, the more wins)") + scale_fill_continuous()
 #collapse teams picked once into a single category
 
-AccaData %>% group_by(Against) %>% summarise(Picked = n()) %>% ggplot(aes(area = Picked, fill = Against, label = paste(Against, Picked, sep = "\n"))) + geom_treemap() +   geom_treemap_text(place = "centre") + theme(legend.position = "none") + labs(title = "Popular teams to bet against")
+AccaData %>% group_by(Against) %>% summarise(Wins = sum(Win), Picked = n()) %>% mutate(Percent = Wins/Picked*100) %>% ggplot(aes(area = Picked, fill = Percent, label = paste(Against, Picked, sep = "\n"))) + geom_treemap() +   geom_treemap_text(place = "centre", aes(colour = after_scale(prismatic::best_contrast(fill, c("white", "black"))))) + theme(legend.position = "none") + labs(title = "Popular teams to bet against (the lighter the blue, the more wins)") + scale_fill_continuous()
 ```
+
+```{r bogeyteams}
+#are there any teams we've never won with/against?
+
+Letdowns<- AccaData %>% group_by(Team) %>% summarise(Wins = sum(Win), Total = n()) %>% mutate(Percent = Wins/Total*100) %>% arrange(-Percent) %>% filter(Total > 2, Wins == 0)
+
+BogeyTeams<- AccaData %>% group_by(Against) %>% summarise(Wins = sum(Win), Total = n()) %>% mutate(Percent = Wins/Total*100) %>% arrange(-Percent) %>% filter(Total > 1, Wins == 0)
+
+```
+
+Are we a curse on teams or are they a curse on us?! We've never won a bet (number of bets in brackets) on `r paste(paste(Letdowns$Team), paste0("(", Letdowns$Total, ")"), sep = ", ")`. Likewise, we've lost 100% of bets (number of bets in brackets) placed *against* `r paste(paste(BogeyTeams$Against), paste0("(", BogeyTeams$Total, ")"), sep = ", ")`
 
 # Individual Stats
 
