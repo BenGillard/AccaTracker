@@ -74,11 +74,9 @@ AccaData %>% group_by(Against) %>% summarise(Wins = sum(Win), Picked = n()) %>% 
 
 ```{r bogeyteams}
 #are there any teams we've never won with/against?
-
 Letdowns<- AccaData %>% group_by(Team) %>% summarise(Wins = sum(Win), Total = n()) %>% mutate(Percent = Wins/Total*100) %>% arrange(-Percent) %>% filter(Total > 2, Wins == 0)
 
 BogeyTeams<- AccaData %>% group_by(Against) %>% summarise(Wins = sum(Win), Total = n()) %>% mutate(Percent = Wins/Total*100) %>% arrange(-Percent) %>% filter(Total > 1, Wins == 0)
-
 ```
 
 Are we a curse on teams or are they a curse on us?! We've never won a bet (number of bets in brackets) on `r paste(paste(Letdowns$Team), paste0("(", Letdowns$Total, ")"), sep = ", ")`. Likewise, we've lost 100% of bets (number of bets in brackets) placed *against* `r paste(paste(BogeyTeams$Against), paste0("(", BogeyTeams$Total, ")"), sep = ", ")`
