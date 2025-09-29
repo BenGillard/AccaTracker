@@ -99,7 +99,7 @@ PlayerSummary<- AccaData %>% group_by(Player) %>% summarise(PercentWin = format(
 
 DaysSinceWin<- AccaData %>% group_by(Player) %>% filter(Win == 1) %>% mutate(LastWin = last(Date) - last(AccaData$Date)) %>% distinct(Player, .keep_all = TRUE) #work out how many days since last win
 
-PlayerSummary$LastWin<- DaysSinceWin$LastWin[match(x = DaysSinceWin$Player, table = PlayerSummary$Player)]
+PlayerSummary$LastWin<- DaysSinceWin$LastWin[match(x = PlayerSummary$Player, table = DaysSinceWin$Player)]
 
 #PlayerSummary<- cbind(PlayerSummary, Consistency = as.numeric(PlayerSummary$Min)/as.numeric(PlayerSummary$Max)
 
