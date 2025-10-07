@@ -98,8 +98,11 @@ PlayerSummary<- AccaData %>% group_by(Player) %>% summarise(PercentWin = format(
                                             HatedTeam = paste0(names(which.max(table(Against))), " (",table(Against)[which.max(table(Against))], ")"))
 
 DaysSinceWin<- AccaData %>% group_by(Player) %>% filter(Win == 1) %>% mutate(LastWin = last(Date) - last(AccaData$Date)) %>% distinct(Player, .keep_all = TRUE) #work out how many days since last win
-
 PlayerSummary$LastWin<- DaysSinceWin$LastWin[match(x = PlayerSummary$Player, table = DaysSinceWin$Player)]
+
+CurrentStreak<- AccaData %>% group_by(Player) %>% filter(Win == 0) %>% mutate(LastLoss = -1*as.numeric((last(Date) - last(AccaData$Date))/7)) %>% distinct(Player, .keep_all = TRUE) #work out how many days since last win
+
+PlayerSummary$Streak<- CurrentStreak$LastLoss[match(x = PlayerSummary$Player, table = CurrentStreak$Player)]
 
 #PlayerSummary<- cbind(PlayerSummary, Consistency = as.numeric(PlayerSummary$Min)/as.numeric(PlayerSummary$Max)
 
