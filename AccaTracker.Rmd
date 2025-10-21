@@ -148,14 +148,14 @@ Tally[-2] %>% kbl(caption = "What if you went it alone?", align = "lc", table.at
 
 cor(x = AccaData$Odds, y = AccaData$Win) #correlation between odds and outcome. negative value means that the lower the odds, the more likely a win (which is what would be expected).
 
-#library(pROC)
+library(pROC)
 
-#AccaModel<- lapply(unique(AccaData$Player), function(x) glm(Win ~ Odds, data = AccaData[which(AccaData$Player == x),])) #regression using odds and homeaway as predictors of win
-#names(AccaModel)<- unique(AccaData$Player)
-#for(player in names(AccaModel)){
-  #print(player)
-#print(ggroc(roc(AccaModel[[player]][["y"]], predict(AccaModel[[player]], type = "response"))) + geom_abline(intercept = 1, linetype = 2) + theme_classic() + labs(title = paste(player))) + labs(x = "False Positive Rate", y = "True Positive Rate") #ROC curve for model
-#}
+AccaModel<- lapply(unique(AccaData$Player), function(x) glm(Win ~ Odds, data = AccaData[which(AccaData$Player == x),])) #regression using odds and homeaway as predictors of win
+names(AccaModel)<- unique(AccaData$Player)
+for(player in names(AccaModel)){
+  print(player)
+  print(ggroc(roc(AccaModel[[player]][["y"]], predict(AccaModel[[player]], type = "response"))) + geom_abline(intercept = 1, linetype = 2) + theme_classic() + labs(title = paste(player))) + labs(x = "False Positive Rate", y = "True Positive Rate") #ROC curve for model
+}
 
 #precision recall curves are more suited to the question being asked here
 
@@ -165,10 +165,9 @@ library(yardstick) #package for PR curves
 AccaData$Truth<- as.factor(1) #Positive Predictive Power = True Positives / (True Positives + False Positives). False positives are impossible!
 Recall <- sum(AccaData$Win == 1) / (sum(AccaData$Win == 1) + sum(AccaData$Win == 0))
 
-AccaData %>% group_by(Player) %>% pr_curve(Truth, Win) %>% autoplot()
+#AccaData %>% group_by(Player) %>% pr_curve(Truth, Win) %>% autoplot()
 ```
 
-[Paper that argues accuracy isn't the best metric for betting](https://doi.org/10.1016/j.mlwa.2024.100539)
+[This paper argues that accuracy isn't the best metric for betting, its better to measure by profit/loss](https://doi.org/10.1016/j.mlwa.2024.100539)
 
-
-created by Ben Gillard
+created by Dr Ben Gillard
