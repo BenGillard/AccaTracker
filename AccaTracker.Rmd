@@ -45,12 +45,13 @@ As a group, our overall win rate between `r min(AccaData$Date)` and `r max(AccaD
 ```{r timetracker}
 #AccaData %>% group_by(Date) %>% summarise(Wins = sum(Win), Odds = prod(Odds)) %>% ggplot(aes(x = Date)) + geom_bar(aes(y = Wins, fill = Date), stat = "identity") + geom_smooth(aes(y = Odds/70), stat = "identity") + theme_classic() + theme(legend.position = "none") + labs(title = "Weekly tracker", subtitle = "Bars for Wins (left axis), line for Total Odds (right axis)") + scale_y_continuous(breaks = 1:11, sec.axis = sec_axis(name = "Odds", transform = ~.*70)) #get summary of each acca. this plot adds a second axis and plots a line for odds. I prefer the second plot for simplicity of figure and code
 
-AccaData %>% group_by(Date) %>% summarise(Wins = sum(Win), Return = 11*prod(Odds)) %>% ggplot(aes(x = Date)) + geom_bar(aes(y = Wins, fill = Return), stat = "identity") + geom_text(aes(label=ceiling(Return), y = Wins),vjust=-0.5, size = 2) + theme_classic() + labs(title = "Weekly tracker", subtitle = "Total estimated Return (£) from £11 stake shown above bar", caption = "bet365 boost odds on accas so the payout shown may be less than actual return on Doug's betslip") + ylim(c(0,11)) + scale_y_continuous(breaks = 0:11) + theme(panel.grid.major.y = element_line(linetype = 2)) #get summary of each acca
+GroupWins<- AccaData %>% group_by(Date) %>% summarise(Wins = sum(Win), Return = ceiling(11*prod(Odds)))
 
-CloseCalls<- AccaData %>% group_by(Date) %>% summarise(Wins = sum(Win)) %>% filter(Wins == 10) %>% select(Date) %>% c()
+GroupWins %>% ggplot(aes(x = Date)) + geom_bar(aes(y = Wins, fill = Return), stat = "identity") + geom_text(aes(label=Return, y = Wins),vjust=-0.5, size = 2) + theme_classic() + labs(title = "Weekly tracker", subtitle = "Total estimated Return (£) from £11 stake shown above bar", caption = "bet365 boost odds on accas so the payout shown may be less than actual return on Doug's betslip") + ylim(c(0,11)) + scale_y_continuous(breaks = 0:11) + theme(panel.grid.major.y = element_line(linetype = 2)) #get summary of each acca
+
+CloseCalls<- GroupWins %>% filter(Wins == 10)
 library(kableExtra)
-AccaData[which(AccaData$Date %in% CloseCalls$Date & AccaData$Win == 0),1:6] %>% kbl(caption = "Table of shame. When we were one result away from the jackpot", row.names = FALSE) %>% kable_classic(html_font = "Cambria") %>% kable_styling("striped")
-
+cbind(AccaData[which(AccaData$Date %in% CloseCalls$Date & AccaData$Win == 0),1:6], CostofLoss = paste0("£",CloseCalls$Return)) %>% kbl(caption = "Table of shame. When we were one result away from the jackpot", row.names = FALSE) %>% kable_classic(html_font = "Cambria") %>% kable_styling("striped")
 ```
 
 ## Home/Away and Odds tracker
