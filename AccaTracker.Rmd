@@ -49,10 +49,12 @@ GroupWins<- AccaData %>% group_by(Date) %>% summarise(Wins = sum(Win), Return = 
 
 GroupWins %>% ggplot(aes(x = Date)) + geom_bar(aes(y = Wins, fill = Return), stat = "identity") + geom_text(aes(label=Return, y = Wins),vjust=-0.5, size = 2) + theme_classic() + labs(title = "Weekly tracker", subtitle = "Total estimated Return (£) from £11 stake shown above bar", caption = "bet365 boost odds on accas so the payout shown may be less than actual return on Doug's betslip") + ylim(c(0,11)) + scale_y_continuous(breaks = 0:11) + theme(panel.grid.major.y = element_line(linetype = 2)) #get summary of each acca
 
-CloseCalls<- GroupWins %>% filter(Wins == 10)
+CloseCalls<- GroupWins %>% filter(Wins == 10) %>% mutate(CostinMincePies = ceiling(Return*0.5))
 library(kableExtra)
-cbind(AccaData[which(AccaData$Date %in% CloseCalls$Date & AccaData$Win == 0),1:6], CostofLoss = paste0("£",CloseCalls$Return)) %>% kbl(caption = "Table of shame. When we were one result away from the jackpot", row.names = FALSE) %>% kable_classic(html_font = "Cambria") %>% kable_styling("striped")
+cbind(AccaData[which(AccaData$Date %in% CloseCalls$Date & AccaData$Win == 0),1:6], CostofLoss = paste0("£",CloseCalls$Return), MincePiesLost = CloseCalls$CostinMincePies) %>% kbl(caption = "Table of shame. When we were one result away from the jackpot", row.names = FALSE) %>% kable_classic(html_font = "Cambria") %>% kable_styling("striped")
 ```
+
+*The amount of mince pies we missed out on is calculated based on Tesco Finest 6 pack (clubcard price) bought in December 2025*
 
 ## Home/Away and Odds tracker
 
