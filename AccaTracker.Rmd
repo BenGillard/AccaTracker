@@ -42,7 +42,7 @@ As a group, our overall win rate between `r min(AccaData$Date)` and `r max(AccaD
 
 ## Success (or lack thereof) tracker
 
-```{r timetracker}
+```{r timetracker, warning=FALSE}
 #AccaData %>% group_by(Date) %>% summarise(Wins = sum(Win), Odds = prod(Odds)) %>% ggplot(aes(x = Date)) + geom_bar(aes(y = Wins, fill = Date), stat = "identity") + geom_smooth(aes(y = Odds/70), stat = "identity") + theme_classic() + theme(legend.position = "none") + labs(title = "Weekly tracker", subtitle = "Bars for Wins (left axis), line for Total Odds (right axis)") + scale_y_continuous(breaks = 1:11, sec.axis = sec_axis(name = "Odds", transform = ~.*70)) #get summary of each acca. this plot adds a second axis and plots a line for odds. I prefer the second plot for simplicity of figure and code
 
 GroupWins<- AccaData %>% group_by(Date) %>% summarise(Wins = sum(Win), Return = ceiling(11*prod(Odds)))
