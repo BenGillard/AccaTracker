@@ -38,7 +38,7 @@ TotalWinnings<- 3795+1509+200
 
 Keeping track of our team acca and looking at trends. Data covers the period between `r min(AccaData$Date)` and `r max(AccaData$Date)` and the gladiators playing are: `r unique(AccaData$Player)`. **That one time our acca actually came in (for £3795 on 16/09/2023) was before data was being collected. On 29/3/2025, Doug cashed out for £1509. It was the correct decision as Leeds went on to draw and the bet would have lost. After 4 postponements for frozen pitches on 3/1/2026, Doug cashed out for £199.88. It was the correct decision as Man City went on to draw and the (abridged) bet would have lost.**
 
-> Our winnings so far total... **£`r TotalWinnings`** (with a total stake of £`r length(unique(AccaData$Date))*11`)
+> Our winnings so far total is... **£`r TotalWinnings`**
 
 # Stats as a group
 
@@ -141,7 +141,7 @@ The most timid player (ie shrunken balls) is `r PlayerSummary$Player[which.min(P
 
 d<- plotly::highlight_key(AccaData, ~Player)
 
-plotly::highlight(plotly::ggplotly(ggplot(data = d, aes(x = Date, y = Odds, col = Player)) + geom_point(aes(shape = as.factor(Win))) + geom_line() + theme_classic() + geom_hline(yintercept = 2, lty = 2, alpha = 0.5) + labs(title = "Tracker of bet odds over time") + theme(legend.position = "none")), on = "plotly_click", off = "plotly_relayout", color = "black", opacityDim = 0.3)
+plotly::highlight(plotly::ggplotly(ggplot(data = d, aes(x = Date, y = Odds, col = Player, label = Team)) + geom_point(aes(shape = as.factor(Win))) + geom_line() + theme_classic() + geom_hline(yintercept = 2, lty = 2, alpha = 0.5) + labs(title = "Tracker of bet odds over time") + theme(legend.position = "none")), on = "plotly_click", off = "plotly_relayout", color = "black", opacityDim = 0.3)
 
 print("Click on a data point to see that player's trend (hold shift key for multiple selections. The dotted line represents evens")
 ```
