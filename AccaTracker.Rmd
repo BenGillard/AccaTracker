@@ -62,7 +62,7 @@ cbind(AccaData[which(AccaData$Date %in% CloseCalls$Date & AccaData$Win == 0),1:6
 
 ## Home/Away and Odds tracker
 
-Tracker of the ratio of home/away picks and a histogram showing at what odds our winning (and losing) bets are placed. On 13/04/2025, Doug picked Birmingham to win at Wembley which is why there is one "Neutral" bit on the Home/Away plot (they lost by the way). Also any AFCON games picked have been marked as "Neutral" (but none of them won so it doesn't make any difference).
+Tracker of the ratio of home/away picks and a histogram showing at what odds our winning (and losing) bets are placed. Any blue "Neutral" bits on the home/away plot represent games played at Wembley or at AFCON.
 
 ```{r homeaway, fig.show='hold', out.width='50%', warning=FALSE}
 ggplot(data = AccaData, aes(x = as.character(Date), y = Win, fill = HomeAway)) + geom_bar(stat = "identity") + theme_classic() + labs(title = "Home/Away tracker") + scale_y_continuous(breaks = 1:11) + theme(axis.text.x = element_blank(), axis.title.x = element_blank()) #bar plot showing split of home or away picks for winning bets
